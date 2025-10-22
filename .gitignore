@@ -27,6 +27,7 @@ dist/
 # Environment / Secrets
 .env
 appsettings.json
+appsettings.Development.json
 
 # OS files
 .DS_Store
