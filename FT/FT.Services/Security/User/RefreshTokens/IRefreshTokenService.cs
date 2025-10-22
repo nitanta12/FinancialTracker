@@ -13,8 +13,9 @@ namespace FT.Services.Security.User.RefreshTokens
         Task<ServiceResult<RefreshToken>> CreateRefreshToken(RefreshToken entity);
         Task<ServiceResult<RefreshToken>> UpdateRefreshToken(RefreshToken entity);
         Task<RefreshToken> GetRefreshToken(string username, string sessionId);
-        Task<RefreshToken> GetRefreshByClientIpToken(string username, string clientIpAddress);
-        Task<RefreshToken> GetRefreshByClientIpToken(string username);
+        Task<ServiceResult<RefreshToken>> GetRefreshByClientIpToken(string username, string clientIpAddress);
+        Task<ServiceResult<RefreshToken>> GetRefreshTokenByUsername(string userName);
+        Task<ServiceResult<RefreshToken>> GetRefreshToken(string token);
         Task<ServiceResult<RefreshToken>> DeleteRefreshToken(string username, string sessionId);
     }
 }

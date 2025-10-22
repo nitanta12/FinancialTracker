@@ -38,16 +38,27 @@ namespace FT.Services.Security.User.RefreshTokens
             var entity = await refreshToken.GetAsync(x => x.UserName == username && x.UserSessionId == sessionId).ConfigureAwait(false);
             return entity;
         }
-        public async Task<RefreshToken> GetRefreshByClientIpToken(string username, string clientIpAddress)
+        public async Task<ServiceResult<RefreshToken>> GetRefreshByClientIpToken(string username, string clientIpAddress)
         {
             var entity = await refreshToken.GetAsync(x => x.UserName == username && x.ClientIpAddress == clientIpAddress).ConfigureAwait(false);
-            return entity;
+            if (entity == null)
+                return new ServiceResult<RefreshToken>(false);
+            return new ServiceResult<RefreshToken>(true) { Data = entity };
         }
 
-        public async Task<RefreshToken> GetRefreshByClientIpToken(string username)
+        public async Task<ServiceResult<RefreshToken>> GetRefreshTokenByUsername(string username)
         {
             var entity = await refreshToken.GetAsync(x => x.UserName == username ).ConfigureAwait(false);
-            return entity;
+            if (entity == null)
+                return new ServiceResult<RefreshToken>(false);
+            return new ServiceResult<RefreshToken>(true) { Data = entity };
+        }
+        public async Task<ServiceResult<RefreshToken>> GetRefreshToken(string token)
+        {
+            var entity = await refreshToken.GetAsync(x => x.Token == token).ConfigureAwait(false);
+            if (entity == null)
+                return new ServiceResult<RefreshToken>(false);
+            return new ServiceResult<RefreshToken>(true) { Data = entity };
         }
         public async Task<ServiceResult<RefreshToken>> UpdateRefreshToken(RefreshToken entity)
         {

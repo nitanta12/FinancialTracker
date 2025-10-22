@@ -31,6 +31,15 @@ namespace FT.Client.Controllers.Features.User.Controller
             var res = await authService.SignOutAsync().ConfigureAwait(false);
             return HrOk(res);
         }
+
+
+        [Route("refresh-token")]
+        [HttpPost]
+        public async Task<ActionResult> RefreshTokenAsync(string token)
+        {
+            var res = await authService.RefreshTokenAsync(refreshToken: token).ConfigureAwait(false);
+            return HrOk(res);
+        }
     }
 }
 
