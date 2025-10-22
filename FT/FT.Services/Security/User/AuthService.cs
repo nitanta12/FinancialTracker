@@ -17,7 +17,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Hosting;
 namespace FT.Services.Security.User
 {
     public class AuthService : IAuthService
@@ -28,6 +28,7 @@ namespace FT.Services.Security.User
         private readonly IApplicationUserManagementService _userManager;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IClientInfoProvider _clientInfo;
+        //private readonly IWebHostEnvironment _hostingEnvironment;
 
 
         public AuthService(IApplicationSignInManager signInManager, IOptions<IdentityConfig> identityConfig, IHttpContextAccessor contextAccessor, IApplicationUserManagementService userManager, IRefreshTokenService refreshTokenService, IClientInfoProvider clientInfo)
@@ -68,6 +69,58 @@ namespace FT.Services.Security.User
             await _contextAccessor.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
             return serviceResult;
         }
+
+        public async Task<ServiceResult<SignInResponse>> RefreshTokenAsync(string refreshToken, bool validateIpAddress = true)
+        {
+            ServiceResult<RefreshToken> storedToken;
+
+            if (validateIpAddress)
+                storedToken = await _refreshTokenService.GetRefreshByClientIpToken(refreshToken, _clientInfo.ClientIpAddress).ConfigureAwait(false);
+            else
+                storedToken = await _refreshTokenService.GetRefreshToken(refreshToken).ConfigureAwait(false);
+
+            if (storedToken == null || !storedToken.Status)
+                return ServiceResult<SignInResponse>.Fail("Invalid token.");
+
+
+            var expiryTime = storedToken.Data.CreatedOn.AddMinutes(_identityConfig.ApiToken.RefreshExpireMinutes);
+
+            if (DateTime.UtcNow > expiryTime)
+                return ServiceResult<SignInResponse>.Fail("Token is already expired");
+
+            //if (!_hostingEnvironment.IsDevelopment())
+            //{
+
+            //}
+
+            var user = await _userManager.FindUserByUserName(storedToken.Data.UserName).ConfigureAwait(false);
+            var roles =new List<string>{ "User"};
+            var (token, expired) = GetToken(user.UserName,user.Id,roles, user.UserId.HasValue ? user.UserId.Value : 0,storedToken.Data.ProxyId,storedToken.Data.UserSessionId);
+
+            storedToken.Data.Token = GenerateRefreshToken();
+            storedToken.Data.ObfuscatedToken = token.Encrypt(AesKeys.RefreshTokenAesKey);
+            storedToken.Data.ExpiresAtUtc = DateTime.UtcNow.AddMinutes(_identityConfig.ApiToken.RefreshExpireMinutes);
+
+            await _refreshTokenService.UpdateRefreshToken(storedToken.Data).ConfigureAwait(false);
+
+            var resp = new ServiceResult<SignInResponse>(true)
+            {
+                Data = new SignInResponse
+                {
+                    //Token based login
+                    Token = token,
+                    RefreshToken = storedToken.Data.Token,
+                    Username = user.UserName,
+                    ExpireMinutes = expired,
+                    IdleTimeoutMinutes = 1,
+                    ProxyId = storedToken.Data.ProxyId
+                },
+                Message = ["User token refreshed"]
+            };
+
+            return resp;
+        }
+
 
         #region Private
         private async Task<ServiceResult<SignInResponse>> SignInAsync(AppUserCore user, string password)
