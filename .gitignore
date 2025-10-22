@@ -1,0 +1,40 @@
+# Build folders
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+
+# Logs
+[Ll]og/
+[Ll]ogs/
+*.log
+
+# Visual Studio
+.vs/
+.vscode/
+.idea/
+
+# Node/React
+node_modules/
+dist/
+*.zip
+*.rar
+*.lock
+
+# Environment / Secrets
+.env
+appsettings.json
+
+# OS files
+.DS_Store
+
+# Uploads / packages
+Uploads/
+packages/
+ExtDlls/
+
+# Configs
+Web.config
