@@ -28,7 +28,7 @@ builder.Services.AddCors(options =>
         builder => builder.AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials()
-        .WithOrigins(""));// add client address/URL in origins
+        .WithOrigins("http://localhost:5173"));// add client address/URL in origins
 });
 var app = builder.Build();
 

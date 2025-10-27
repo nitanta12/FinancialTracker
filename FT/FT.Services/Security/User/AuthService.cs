@@ -127,6 +127,9 @@ namespace FT.Services.Security.User
         {
             var signInResp = await _signInManager.PasswordSignInAsync(user.UserName, password).ConfigureAwait(false);
             var authId = Guid.NewGuid().ToString();
+
+
+            _ = await SignOutAsync().ConfigureAwait(false);
             if (signInResp == Core.Security.Enum.SignInStatus.Fail)
                 return new ServiceResult<SignInResponse>(false) { Message = ["Username or password incorrect."] };
             else if(signInResp == Core.Security.Enum.SignInStatus.LockedOut)
