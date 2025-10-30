@@ -1,6 +1,7 @@
 ﻿using FT.Core.Security;
 using FT.Core.Security.User;
-using HR.Core.ServiceResult;
+using FT.Core.ServiceResult;
+using FT.Services.Common.Email;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace FT.Services.Security.User
 {
-    public class UserService (IApplicationUserManagementService userManager) : IUserService
+    public class UserService (IApplicationUserManagementService userManager, IEmailSenderService emailSend) : IUserService
     {
         public async Task<ServiceResult<UserCore>> CreateUserAsync(UserCore entity, IEnumerable<string> roles)
         {

@@ -4,7 +4,6 @@ using FT.Core.Security.ClientInfo;
 using FT.Core.Security.User;
 using FT.EntityFramework.EntityFramework.Security.Models;
 using FT.Services.Security.User.RefreshTokens;
-using HR.Core.ServiceResult;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using FT.Core.ServiceResult;
 namespace FT.Services.Security.User
 {
     public class AuthService : IAuthService

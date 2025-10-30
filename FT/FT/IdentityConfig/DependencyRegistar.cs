@@ -14,6 +14,7 @@ namespace FT.Client.IdentityConfig.DependencyRegister
 
 
             services.ConfigureSecurityModules();
+            services.ConfigureCommonRepos();
         }
     }
 }

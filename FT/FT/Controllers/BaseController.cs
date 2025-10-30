@@ -1,5 +1,4 @@
 ﻿using FT.Core.ServiceResult;
-using HR.Core.ServiceResult;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,6 +1,6 @@
 ﻿using FT.Core.Security;
 using FT.Core.Security.User;
-using HR.Core.ServiceResult;
+using FT.Core.ServiceResult;
 using System;
 using System.Collections.Generic;
 using System.Linq;
