@@ -25,7 +25,7 @@ namespace FT.Client.Controllers.Features.User.Controller
 
         [Route("signout")]
         [HttpPost]
-        [Authorize(AuthenticationSchemes = AuthSchemes)]
+        //[Authorize(AuthenticationSchemes = AuthSchemes)]
         public async Task<ActionResult> SignOutAsync()
         {
             var res = await authService.SignOutAsync().ConfigureAwait(false);
