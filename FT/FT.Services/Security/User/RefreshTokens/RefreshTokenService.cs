@@ -1,6 +1,6 @@
 ﻿using FT.Core.Security;
+using FT.Core.ServiceResult;
 using FT.EntityFramework.EntityFramework.Security.Models;
-using HR.Core.ServiceResult;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

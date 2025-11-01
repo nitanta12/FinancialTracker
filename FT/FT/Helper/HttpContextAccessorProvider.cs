@@ -1,5 +1,6 @@
 ﻿using FT.Core.Security;
 using FT.Core.Security.ClientInfo;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.Extensions.Primitives;
 using System.Security.Claims;
 
@@ -19,6 +20,15 @@ namespace FT.Client.Helper
             {
                 var httpContext = _httpContextAccessor.HttpContext;
                 return httpContext?.Request?.Headers?["User-Agent"];
+            }
+        }
+
+        public string BaseUri
+        {
+            get
+            {
+                var request = _httpContextAccessor.HttpContext.Request;
+                return $"{request.Scheme}://{request.Host.Value}{request.PathBase.Value}";
             }
         }
 

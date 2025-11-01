@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 using FT.EntityFramework.EntityFramework.Security.Models;
 using FT.Core.Security;
+using FT.Core.Domain.Common.Mail;
 namespace FT.EntityFramework.EntityFramework.DbContext
 {
     public partial class ApplicationDbContext : IdentityDbContext<ApplicationIdentityUser, ApplicationIdentityRole, string>
@@ -17,6 +18,12 @@ namespace FT.EntityFramework.EntityFramework.DbContext
 
         #region DBSet
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        public DbSet<ResetTokens> ResetTokens { get; set; }
+        #region MailSetting
+        public DbSet<MailSetting> MailSettings { get; set; }
+        #endregion
+
         #endregion
         public Guid UserId { get; set; }
         public Guid? TenantId { get; set; }

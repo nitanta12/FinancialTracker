@@ -1,4 +1,6 @@
 ﻿using FT.Core.Security;
+using FT.Core.Security.Infrastructure;
+using FT.EntityFramework.EntityFramework.Security.Repository;
 using FT.EntityFramework.Repository;
 using FT.Services.Security.User;
 using FT.Services.Security.User.RefreshTokens;
@@ -24,6 +26,8 @@ namespace FT.DependencyResolution
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
+
+            services.AddScoped<IResetTokenRepository, ResetTokenRepository>();
         }
     }
 }

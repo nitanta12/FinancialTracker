@@ -82,7 +82,11 @@
     {
         public bool CustomLifespanEnabled { get; set; }
         public int DefaultLifespanInMin { get; set; }
-        public int SelfRequestedLifespanInMin { get; set; }
-        public int AdminRequestedLifespanInMin { get; set; }
+        
+    }
+
+    public class ClientUrlInfo
+    {
+        public string BaseUrl { get; set; }
     }
 }

@@ -1,13 +1,19 @@
 using FT.Client.Extenstion;
 using FT.Client.IdentityConfig.DependencyRegister;
 using FT.DependencyResolution;
+using FT.EntityFramework.EntityFramework.Security.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 var Configuration = builder.Configuration;
+
+
+builder.Services.Configure<ClientUrlInfo>(builder.Configuration.GetSection("ClientUrl"));
+
 
 // Add services to the container.
 builder.Services.ConfigureClientStartupServices(Configuration);
@@ -18,6 +24,8 @@ builder.Services.AddControllers();
 //           .AddScheme<ApiKeyAuthenticationOptions, ApiKeyAuthenticationHandler>("ApiKeyAuthorization", options => { });
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
+
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen();
@@ -28,8 +36,9 @@ builder.Services.AddCors(options =>
         builder => builder.AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials()
-        .WithOrigins(""));// add client address/URL in origins
+        .WithOrigins("http://localhost:5173"));// add client address/URL in origins
 });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,6 +56,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthorization();
 

@@ -25,7 +25,7 @@ namespace FT.Client.Controllers.Features.User.Controller
 
         [Route("signout")]
         [HttpPost]
-        [Authorize(AuthenticationSchemes = AuthSchemes)]
+        //[Authorize(AuthenticationSchemes = AuthSchemes)]
         public async Task<ActionResult> SignOutAsync()
         {
             var res = await authService.SignOutAsync().ConfigureAwait(false);
@@ -38,6 +38,15 @@ namespace FT.Client.Controllers.Features.User.Controller
         public async Task<ActionResult> RefreshTokenAsync(string token)
         {
             var res = await authService.RefreshTokenAsync(refreshToken: token).ConfigureAwait(false);
+            return HrOk(res);
+        }
+
+
+        [Route("forget-password")]
+        [HttpPost]
+        public async Task<ActionResult> ForgetPasswordAsync(string email)
+        {
+            var res = await authService.ForgetPasswordSendEmail(email).ConfigureAwait(false);
             return HrOk(res);
         }
     }

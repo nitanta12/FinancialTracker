@@ -1,9 +1,8 @@
-﻿using FT.Core.ServiceResult;
-using Microsoft.VisualBasic;
+﻿using Microsoft.VisualBasic;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace HR.Core.ServiceResult
+namespace FT.Core.ServiceResult
 {
     public class ServiceResult : IServiceResult
     {
@@ -17,7 +16,7 @@ namespace HR.Core.ServiceResult
         public ServiceResult(bool status, List<string> message = null, string messageType = null)
         {
             if (string.IsNullOrEmpty(messageType))
-                MessageType = FT.Core.ServiceResult.MessageType.Success;
+                MessageType = Core.ServiceResult.MessageType.Success;
             else
                 MessageType = messageType;
             if (message == null)
@@ -33,11 +32,11 @@ namespace HR.Core.ServiceResult
         }
         public ServiceResult<T> ToResult<T>()
         {
-            return new ServiceResult<T>(this.Status, this.Message, this.MessageType);
+            return new ServiceResult<T>(Status, Message, MessageType);
         }
         public static ServiceResult Fail(string message)
         {
-            return new ServiceResult(false) { Message = new List<string> { message }, MessageType = FT.Core.ServiceResult.MessageType.Warning };
+            return new ServiceResult(false) { Message = new List<string> { message }, MessageType = Core.ServiceResult.MessageType.Warning };
         }
 
         public static ServiceResult Fail(string message, string messageType)
@@ -47,7 +46,7 @@ namespace HR.Core.ServiceResult
 
         public static ServiceResult Fail(List<string> messages)
         {
-            return new ServiceResult(false) { Message = messages, MessageType = FT.Core.ServiceResult.MessageType.Warning };
+            return new ServiceResult(false) { Message = messages, MessageType = Core.ServiceResult.MessageType.Warning };
         }
 
         public static ServiceResult Fail(List<string> messages, string messageType)
@@ -57,11 +56,11 @@ namespace HR.Core.ServiceResult
 
         public static ServiceResult Success(string message)
         {
-            return new ServiceResult(true) { MessageType =  FT.Core.ServiceResult.MessageType.Success, Message = [message] };
+            return new ServiceResult(true) { MessageType = Core.ServiceResult.MessageType.Success, Message = [message] };
         }
         public static ServiceResult Success(List<string> messages)
         {
-            return new ServiceResult(true) { MessageType = FT.Core.ServiceResult.MessageType.Success, Message = messages };
+            return new ServiceResult(true) { MessageType = Core.ServiceResult.MessageType.Success, Message = messages };
         }
         public ServiceResult()
         {
@@ -70,7 +69,7 @@ namespace HR.Core.ServiceResult
     }
 }
 
-namespace HR.Core.ServiceResult
+namespace FT.Core.ServiceResult
 {
     public class ServiceResult<T> : ServiceResult
     {
@@ -78,17 +77,17 @@ namespace HR.Core.ServiceResult
         private T ResposeData { get; set; }
         public T Data
         {
-            get => this.ResposeData;
-            set => this.ResposeData = value;
+            get => ResposeData;
+            set => ResposeData = value;
         }
 
         public ServiceResult ToResult()
         {
-            return new ServiceResult(this.Status, this.Message, this.MessageType);
+            return new ServiceResult(Status, Message, MessageType);
         }
         public ServiceResult<T> ToResult<T>()
         {
-            return new ServiceResult<T>(this.Status, this.Message, this.MessageType);
+            return new ServiceResult<T>(Status, Message, MessageType);
         }
 
         public ServiceResult(bool status, List<string> message = null, string messageType = null)
@@ -98,12 +97,12 @@ namespace HR.Core.ServiceResult
 
         public new static ServiceResult<T> Fail(string message)
         {
-            return new ServiceResult<T>(false, [message], FT.Core.ServiceResult.MessageType.Warning);
+            return new ServiceResult<T>(false, [message], Core.ServiceResult.MessageType.Warning);
         }
 
         public static ServiceResult<T> Fail(T data, string message)
         {
-            return new ServiceResult<T>(false) { Data = data, Message = [message], MessageType = FT.Core.ServiceResult.MessageType.Warning };
+            return new ServiceResult<T>(false) { Data = data, Message = [message], MessageType = Core.ServiceResult.MessageType.Warning };
         }
 
         public new static ServiceResult<T> Fail(string message, string messageType)
@@ -112,7 +111,7 @@ namespace HR.Core.ServiceResult
         }
         public new static ServiceResult<T> Fail(List<string> messages)
         {
-            return new ServiceResult<T>(false) { Message = messages, MessageType = FT.Core.ServiceResult.MessageType.Warning };
+            return new ServiceResult<T>(false) { Message = messages, MessageType = Core.ServiceResult.MessageType.Warning };
         }
         public new static ServiceResult<T> Fail(List<string> messages, string messageType)
         {
@@ -121,22 +120,22 @@ namespace HR.Core.ServiceResult
 
         public new static ServiceResult<T> Success(string message)
         {
-            return new ServiceResult<T>(true) { Message = new List<string> { message }, MessageType = FT.Core.ServiceResult.MessageType.Success };
+            return new ServiceResult<T>(true) { Message = new List<string> { message }, MessageType = Core.ServiceResult.MessageType.Success };
         }
 
         public static ServiceResult<T> Success(T data)
         {
-            return new ServiceResult<T>(true) { Data = data, MessageType = FT.Core.ServiceResult.MessageType.Success };
+            return new ServiceResult<T>(true) { Data = data, MessageType = Core.ServiceResult.MessageType.Success };
         }
 
         public static ServiceResult<T> Success(T data, string message)
         {
-            return new ServiceResult<T>(true) { Data = data, Message = new List<string> { message }, MessageType = FT.Core.ServiceResult.MessageType.Success };
+            return new ServiceResult<T>(true) { Data = data, Message = new List<string> { message }, MessageType = Core.ServiceResult.MessageType.Success };
         }
 
         public static ServiceResult<T> Success(T data, List<string> messages)
         {
-            return new ServiceResult<T>(true) { Data = data, Message = messages, MessageType = FT.Core.ServiceResult.MessageType.Success };
+            return new ServiceResult<T>(true) { Data = data, Message = messages, MessageType = Core.ServiceResult.MessageType.Success };
         }
     }
 }

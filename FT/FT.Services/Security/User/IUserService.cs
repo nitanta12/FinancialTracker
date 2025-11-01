@@ -1,5 +1,5 @@
 ﻿using FT.Core.Security;
-using HR.Core.ServiceResult;
+using FT.Core.ServiceResult;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +12,7 @@ namespace FT.Services.Security.User
     {
 
         Task<ServiceResult<UserCore>> CreateUserAsync(UserCore entity, IEnumerable<string> roles);
+
+        Task<ServiceResult> ResetPassword(string userId, string tokenId, string password);
     }
 }

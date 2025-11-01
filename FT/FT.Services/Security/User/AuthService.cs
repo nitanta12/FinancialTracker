@@ -4,7 +4,6 @@ using FT.Core.Security.ClientInfo;
 using FT.Core.Security.User;
 using FT.EntityFramework.EntityFramework.Security.Models;
 using FT.Services.Security.User.RefreshTokens;
-using HR.Core.ServiceResult;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +17,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
+using FT.Core.ServiceResult;
+using FT.Services.Common.Email;
 namespace FT.Services.Security.User
 {
     public class AuthService : IAuthService
@@ -28,10 +29,14 @@ namespace FT.Services.Security.User
         private readonly IApplicationUserManagementService _userManager;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly IClientInfoProvider _clientInfo;
+        private readonly IEmailSenderService _emailSender;
+        public readonly ClientUrlInfo _clientUrlInfo;
         //private readonly IWebHostEnvironment _hostingEnvironment;
 
 
-        public AuthService(IApplicationSignInManager signInManager, IOptions<IdentityConfig> identityConfig, IHttpContextAccessor contextAccessor, IApplicationUserManagementService userManager, IRefreshTokenService refreshTokenService, IClientInfoProvider clientInfo)
+        public AuthService(IApplicationSignInManager signInManager, IOptions<IdentityConfig> identityConfig, IHttpContextAccessor contextAccessor, 
+            IApplicationUserManagementService userManager, IRefreshTokenService refreshTokenService, IClientInfoProvider clientInfo, 
+            IEmailSenderService emailSender,IOptions<ClientUrlInfo> clientUrlInfo)
         {
             _signInManager = signInManager;
             _identityConfig = identityConfig.Value;
@@ -39,6 +44,8 @@ namespace FT.Services.Security.User
             _userManager = userManager;
             _refreshTokenService = refreshTokenService;
             _clientInfo = clientInfo;
+            _emailSender = emailSender;
+            _clientUrlInfo = clientUrlInfo.Value;
         }
 
         public async Task<ServiceResult<SignInResponse>> SignInAsync(string userName, string password)
@@ -94,8 +101,8 @@ namespace FT.Services.Security.User
             //}
 
             var user = await _userManager.FindUserByUserName(storedToken.Data.UserName).ConfigureAwait(false);
-            var roles =new List<string>{ "User"};
-            var (token, expired) = GetToken(user.UserName,user.Id,roles, user.UserId.HasValue ? user.UserId.Value : 0,storedToken.Data.ProxyId,storedToken.Data.UserSessionId);
+            var roles = new List<string> { "User" };
+            var (token, expired) = GetToken(user.UserName, user.Id, roles, user.UserId.HasValue ? user.UserId.Value : 0, storedToken.Data.ProxyId, storedToken.Data.UserSessionId);
 
             storedToken.Data.Token = GenerateRefreshToken();
             storedToken.Data.ObfuscatedToken = token.Encrypt(AesKeys.RefreshTokenAesKey);
@@ -121,24 +128,86 @@ namespace FT.Services.Security.User
             return resp;
         }
 
+        public async Task<ServiceResult> ForgetPasswordSendEmail(string email)
+        {
+            var resetUrl = _clientUrlInfo.BaseUrl + "/" + "resetpassword?token=" + "{token}" + "&verify=" + "{userId}";
+            var userDetail = await _userManager.FindUserByEmailAsync(email).ConfigureAwait(false);
+            if (userDetail == null)
+            {
+                return ServiceResult.Fail("User not found");
+            }
 
+
+            var (token, resetToken) = await _userManager.GenerateResetToken(userDetail.Id).ConfigureAwait(false);
+
+            resetUrl = resetUrl.Replace("{token}", token, StringComparison.OrdinalIgnoreCase).
+                       Replace("{userId}", userDetail.Id.ToString());
+
+
+            var tokenValidityMessage = (resetToken == default || resetToken.LifespanInMin <= 0) ? string.Empty
+                : $"The token is valid up to: {resetToken.LifespanInMin:hh\\:mm}";
+
+
+            var callbackUrl = String.Format("<a href=\"{0}\">here</a>", resetUrl);
+
+            var body = $@"
+                            <html>
+                            <body style='font-family: Arial, sans-serif; color: #333;'>
+                                <p>Hi {userDetail.FirstName},</p>
+
+                             <p>
+                                 You (or someone pretending to be you) has initiated a request to create a new password for your RigoHR login.
+                             </p>
+
+                             <p>
+                                  To create a new password, click the button below and follow the process:
+                             </p>
+
+                                <p style='text-align:'>
+                                 <a href='{resetUrl}' 
+                                   style='background-color: #007bff; color: white; padding: 10px 20px; 
+                                         text-decoration: none; border-radius: 5px; display: inline-block;'>
+                                  Reset My Password
+                                 </a>
+                             </p>
+
+                             <p>
+                                  If you didn't make this request, you can safely ignore this email; no changes have been made.
+                                </p>
+
+                                <p style='font-size: 0.9em; color: #777;'>
+                                  This is a system-generated notification.<br>
+                                  Do not reply — no one will read or respond.
+                             </p>
+                             </body>
+                            </html>";
+
+            var subject = "Reset your password.";
+
+            var sendMail = await _emailSender.SendEmailAsync(subject, userDetail.Email, body).ConfigureAwait(false);
+
+            return new ServiceResult(true) { Message = ["Email successfully sent"] };
+        }
         #region Private
         private async Task<ServiceResult<SignInResponse>> SignInAsync(AppUserCore user, string password)
         {
             var signInResp = await _signInManager.PasswordSignInAsync(user.UserName, password).ConfigureAwait(false);
             var authId = Guid.NewGuid().ToString();
+
+
+            _ = await SignOutAsync().ConfigureAwait(false);
             if (signInResp == Core.Security.Enum.SignInStatus.Fail)
                 return new ServiceResult<SignInResponse>(false) { Message = ["Username or password incorrect."] };
-            else if(signInResp == Core.Security.Enum.SignInStatus.LockedOut)
+            else if (signInResp == Core.Security.Enum.SignInStatus.LockedOut)
             {
                 var lockedOutresp = await _userManager.GetLockedInDateTimeAsync(user.UserName).ConfigureAwait(false);
                 var timeDiff = lockedOutresp.Subtract(DateTime.Now);
                 return new ServiceResult<SignInResponse>(false,
-                    new List<string> { $"User locked for {timeDiff.Hours}:{timeDiff.Minutes}. Try again later"});
+                    new List<string> { $"User locked for {timeDiff.Hours}:{timeDiff.Minutes}. Try again later" });
             }
             else
             {
-                await SetCookiesForAuthentication(user, authId,string.Empty , Guid.NewGuid());
+                await SetCookiesForAuthentication(user, authId, string.Empty, Guid.NewGuid());
 
                 return await GenerateTokenForAuthentication(user, Guid.Empty, authId);
             }
@@ -155,7 +224,7 @@ namespace FT.Services.Security.User
         {
             IEnumerable<string> roles = new List<string> { "User" };
 
-            var (token, expiryTime) = GetToken(user.UserName, user.Id, roles, user.UserId.HasValue?user.UserId.Value : 0, proxyId, authId);
+            var (token, expiryTime) = GetToken(user.UserName, user.Id, roles, user.UserId.HasValue ? user.UserId.Value : 0, proxyId, authId);
 
             var refreshTokenTime = DateTime.UtcNow.AddMinutes(_identityConfig.ApiToken.RefreshExpireMinutes);
 
@@ -181,7 +250,7 @@ namespace FT.Services.Security.User
             {
                 Data = signIn,
             };
-        
+
         }
 
         private static string GenerateRefreshToken()
@@ -241,10 +310,10 @@ namespace FT.Services.Security.User
                     IsPersistent = true,
                     ExpiresUtc = DateTime.Now.AddMinutes(_identityConfig.Cookie.CookieExpireMinutes)
                 };
-                
+
                 IEnumerable<string> roles = new List<string> { "User" };
 
-                var claimIdentity = CreateIdentity(user, roles, AuthConsts.ApplicationCookie, sessionId, expiryDate, proxyId,AuthMethod.Cookie);
+                var claimIdentity = CreateIdentity(user, roles, AuthConsts.ApplicationCookie, sessionId, expiryDate, proxyId, AuthMethod.Cookie);
 
                 string provider = "FT_App";
 
@@ -253,7 +322,7 @@ namespace FT.Services.Security.User
             }
         }
 
-        private static ClaimsIdentity CreateIdentity(AppUserCore user, IEnumerable<string> roles, string authenticationType , string authId,string expiryDate, Guid? proxyId,AuthMethod? authMethod = null)
+        private static ClaimsIdentity CreateIdentity(AppUserCore user, IEnumerable<string> roles, string authenticationType, string authId, string expiryDate, Guid? proxyId, AuthMethod? authMethod = null)
         {
             var email = user.Email ?? "";
 
@@ -263,7 +332,7 @@ namespace FT.Services.Security.User
                 new Claim(ClaimTypes.Email , email)
             };
 
-            if(authMethod is not null)
+            if (authMethod is not null)
                 claim.Add(new Claim(AuthConsts.AuthMethod, ((byte)AuthMethod.Cookie).ToString()));
 
             if (!string.IsNullOrEmpty(expiryDate))
@@ -278,7 +347,7 @@ namespace FT.Services.Security.User
             if (user.UserId != null)
                 claim.Add(new Claim(AuthConsts.UserId, user.UserId.Value.ToString()));
 
-            foreach(var role in roles)
+            foreach (var role in roles)
             {
                 claim.Add(new Claim(ClaimTypes.Role, role));
             }
