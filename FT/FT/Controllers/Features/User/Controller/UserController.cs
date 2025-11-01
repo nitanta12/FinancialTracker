@@ -17,5 +17,14 @@ namespace FT.Client.Controllers.Features.User.Controller
             return Ok(userResp);
 
         }
+
+
+        [Route("reset-password")]
+        [HttpPost]
+        public async Task<ActionResult> ResetPasswordOfUser([FromBody] ResetPasswordDto dto)
+        {
+            var userResp = await userService.ResetPassword(dto.UserId, dto.TokenId, dto.Password).ConfigureAwait(false);
+            return Ok(userResp);
+        }
     }
 }

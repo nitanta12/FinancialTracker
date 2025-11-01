@@ -12,5 +12,7 @@ namespace FT.Services.Security.User
     {
 
         Task<ServiceResult<UserCore>> CreateUserAsync(UserCore entity, IEnumerable<string> roles);
+
+        Task<ServiceResult> ResetPassword(string userId, string tokenId, string password);
     }
 }

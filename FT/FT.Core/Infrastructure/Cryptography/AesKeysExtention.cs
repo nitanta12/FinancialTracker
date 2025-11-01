@@ -42,5 +42,28 @@ namespace FT.Core.Infrastructure.Cryptography
                 return string.Empty;
             }
         }
+
+
+        public static string Decrypt(this string cipherText, string key)
+        {
+            try
+            {
+                using var aes = Aes.Create();
+                aes.Key = Encoding.UTF8.GetBytes(key);
+                byte[] iv = new byte[16];
+                aes.IV = iv;
+                var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                byte[] buffer = Convert.FromBase64String(cipherText);
+                using MemoryStream memoryStream = new MemoryStream(buffer);
+                using CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
+                using StreamReader streamReader = new StreamReader(cryptoStream);
+                return streamReader.ReadToEnd();
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
     }
 }

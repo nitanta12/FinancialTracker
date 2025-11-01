@@ -17,5 +17,8 @@ namespace FT.Services.Security.User
         Task<ServiceResult> SignOutAsync();
 
         Task<ServiceResult<SignInResponse>> RefreshTokenAsync(string refreshToken, bool validateIpAddress = true);
+
+
+        Task<ServiceResult> ForgetPasswordSendEmail(string email);
     }
 }

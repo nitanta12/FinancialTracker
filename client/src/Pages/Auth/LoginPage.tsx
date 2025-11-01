@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 //store
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../redux/store";
+import type { AppDispatch, RootState } from "../../redux/store";
 import { useNavigate } from "react-router-dom";
-import { Button } from "../Components/ui/button";
+import { Button } from "../../Components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,13 +11,13 @@ import {
   CardHeader,
   CardFooter,
   CardTitle,
-} from "../Components/ui/card";
-import { Input } from "../Components/ui/input";
+} from "../../Components/ui/card";
+import { Input } from "../../Components/ui/input";
 
 import { Loader2 } from "lucide-react";
 //api
-import  {clearError, signIn}  from "../redux/authSlice";
-import Error from "../Components/Error";
+import  {clearError, signIn}  from "../../redux/authSlice";
+import Error from "../../Components/Error";
 
 const LoginPage = () => {
   const dispatch = useDispatch<AppDispatch>(); 
@@ -67,8 +67,9 @@ const LoginPage = () => {
                   required
                   className=""
                 />
+                
               </div>
-
+               
               <div>
                 {/* <label htmlFor='password' className = "block text-sm font-medium mb-1">
                         Password:
@@ -102,7 +103,7 @@ const LoginPage = () => {
               </Button>
             </CardFooter>
             <a
-              href="/dashboard"
+              href="/forgetpassword"
               className="w-full text-center py-2 px-4 rounded hover:shadow-lg hover:bg-gray-100 underline transition-all"
             >
               Forgot your password?

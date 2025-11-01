@@ -19,3 +19,22 @@ export const authApi = {
 }
 
 
+export const forgetPasswordApi = {
+     forgetPassword : async (email : string) => {
+        const response = await axios.post(`${API_BASE_URL}${API_Routes.AUTH.FORGETPASSWORD}?email=${encodeURIComponent(email)}`,{},{withCredentials : true});
+
+        return response.data;
+     }
+}
+
+
+export const resetPasswordApi = {
+    resetPassword : async(userId : string, tokenId: string, password: string) => {
+        var response = await axios.post(`${API_BASE_URL}${API_Routes.RESET.RESETPASSWORD}`,{userId,tokenId,password},{withCredentials : true});
+
+        return response.data;
+    }
+}
+
+
+

@@ -40,6 +40,15 @@ namespace FT.Client.Controllers.Features.User.Controller
             var res = await authService.RefreshTokenAsync(refreshToken: token).ConfigureAwait(false);
             return HrOk(res);
         }
+
+
+        [Route("forget-password")]
+        [HttpPost]
+        public async Task<ActionResult> ForgetPasswordAsync(string email)
+        {
+            var res = await authService.ForgetPasswordSendEmail(email).ConfigureAwait(false);
+            return HrOk(res);
+        }
     }
 }
 

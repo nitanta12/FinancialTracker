@@ -47,4 +47,11 @@ namespace FT.Core.Security
             Errors = errors;
         }
     }
+
+    public class ResetPasswordDto
+    {
+        public string UserId { get; set; }
+        public string TokenId { get; set; }
+        public string Password { get; set; }
+    }
 }

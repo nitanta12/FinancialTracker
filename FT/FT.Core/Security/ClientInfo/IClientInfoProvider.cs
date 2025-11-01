@@ -12,7 +12,7 @@
         int? UserId { get;  }
 
         bool IsCanary { get; }
-
+        string BaseUri { get; }
 
     }
 }

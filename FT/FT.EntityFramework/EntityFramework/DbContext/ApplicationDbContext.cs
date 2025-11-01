@@ -19,7 +19,7 @@ namespace FT.EntityFramework.EntityFramework.DbContext
         #region DBSet
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-
+        public DbSet<ResetTokens> ResetTokens { get; set; }
         #region MailSetting
         public DbSet<MailSetting> MailSettings { get; set; }
         #endregion
